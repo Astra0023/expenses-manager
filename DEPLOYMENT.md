@@ -6,11 +6,11 @@ for an Android installable build. Both offer free tiers, subject to their
 current limits. Check [Cloudflare Pages pricing](https://developers.cloudflare.com/pages/platform/limits/)
 and [Expo pricing](https://expo.dev/pricing/) before deploying.
 
-| What you want | Approach | Cost and limitations |
-| --- | --- | --- |
-| Website on a computer or phone | Cloudflare Pages | Free tier; works in a mobile browser |
-| Android app installed on a device | EAS Build, then install an APK | Free EAS quota; users install the APK outside Google Play |
-| iPhone app in the App Store or TestFlight | EAS Build and Apple Developer Program | Apple developer membership is paid |
+| What you want                             | Approach                              | Cost and limitations                                      |
+| ----------------------------------------- | ------------------------------------- | --------------------------------------------------------- |
+| Website on a computer or phone            | Cloudflare Pages                      | Free tier; works in a mobile browser                      |
+| Android app installed on a device         | EAS Build, then install an APK        | Free EAS quota; users install the APK outside Google Play |
+| iPhone app in the App Store or TestFlight | EAS Build and Apple Developer Program | Apple developer membership is paid                        |
 
 The website can be used on both Android and iPhone without publishing a native
 app. Adding the website to a phone's home screen is a browser shortcut, not an
@@ -49,6 +49,7 @@ installation of the native Expo app.
 
    The build should produce `apps\web\dist\index.html`. If PowerShell permits
    npm scripts, `npm` can be used instead of `npm.cmd`.
+
 4. Put the **entire monorepo** in a GitHub repository, including `apps`,
    `packages`, the root `package.json` and `package-lock.json`. Do not upload
    `node_modules`, generated build output, or secrets. A private GitHub
@@ -66,18 +67,19 @@ installation of the native Expo app.
    Pages deployment rather than a Workers deployment.
 2. Select the production branch. Configure the build as follows:
 
-   | Setting | Value |
-   | --- | --- |
-   | Framework preset | None (or a preset with the values below) |
-   | Root directory | Repository root (leave blank or use `/`) |
-   | Build command | `npm run web:build` |
-   | Build output directory | `apps/web/dist` |
-   | Environment variable | `NODE_VERSION` = `22` |
+   | Setting                | Value                                    |
+   | ---------------------- | ---------------------------------------- |
+   | Framework preset       | None (or a preset with the values below) |
+   | Root directory         | Repository root (leave blank or use `/`) |
+   | Build command          | `npm run web:build`                      |
+   | Build output directory | `apps/web/dist`                          |
+   | Environment variable   | `NODE_VERSION` = `22`                    |
 
    Cloudflare settings use forward slashes even if you are working on Windows.
    The repository root matters: npm workspaces need the shared `packages/core`
    and root lockfile. Pages installs dependencies before running the build.
    No application-specific environment variables or backend are required.
+
 3. Save and deploy. Open the resulting `https://<project>.pages.dev` URL.
 4. Verify on a computer and a phone: open the landing page and demo, register
    a test account, add an expense, refresh, and confirm the data remains in
@@ -111,7 +113,7 @@ Google Play.
    root to include the npm workspaces; see
    [EAS project uploads](https://docs.expo.dev/build-reference/project-upload/).
 2. In `apps\mobile\app.json`, replace the example
-   `android.package` (`com.example.manageexpenses`) with a unique reverse-domain
+   `android.package` (`com.astra0023.manageexpenses`) with a unique reverse-domain
    identifier you control, for example `com.yourorganization.manageexpenses`.
    Keep it stable after distributing the app: changing it creates a different
    app and does not migrate the existing installation's data. If building for
@@ -128,6 +130,7 @@ Google Play.
    This can update `app.json` and create `eas.json` in `apps\mobile`. Review
    and save those project configuration changes in your repository. EAS commands
    for this monorepo must run from `apps\mobile`, not the repository root.
+
 4. In `apps\mobile\eas.json`, add a `preview` profile under the existing
    `build` object, preserving the other generated settings:
 
@@ -143,6 +146,7 @@ Google Play.
    Make sure the surrounding JSON remains valid, including commas between
    profiles. An APK can be installed directly; the default production Android
    App Bundle (`.aab`) cannot.
+
 5. Still in `apps\mobile`, run:
 
    ```powershell
@@ -152,6 +156,7 @@ Google Play.
    Follow the signing prompts; EAS can generate an Android keystore. Keep
    signing credentials secure and retain access to them: future updates must
    use the same signing key. Do not commit credentials to the repository.
+
 6. When the build succeeds, open its Expo build-details link and download the
    APK on your Android device. Install it, allowing installation from that
    trusted source if Android asks. Only share the build link with intended

@@ -5,15 +5,12 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "plugins": [
-      "expo-notifications",
-      "expo-document-picker"
-    ],
+    "plugins": ["expo-notifications", "expo-document-picker"],
     "ios": {
-      "bundleIdentifier": "com.example.manageexpenses"
+      "bundleIdentifier": "com.astra0023.manageexpenses"
     },
     "android": {
-      "package": "com.example.manageexpenses"
+      "package": "com.astra0023.manageexpenses"
     },
     "extra": {
       "eas": {

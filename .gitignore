@@ -4,3 +4,6 @@ dist
 .env*
 *.log
 .expo/
+**/node_modules/
+**/node_modules/.vite/
+node_modules/

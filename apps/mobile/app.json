@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "Manage Expenses",
+    "slug": "manage-expenses",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": ["expo-notifications", "expo-document-picker"],
+    "ios": { "bundleIdentifier": "com.example.manageexpenses" },
+    "android": { "package": "com.example.manageexpenses" }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "manage-expenses",
+  "private": true,
+  "workspaces": ["packages/*", "apps/*"],
+  "scripts": {
+    "web": "npm run dev -w @manage-expenses/web",
+    "web:build": "npm run build -w @manage-expenses/web",
+    "mobile": "npm run start -w @manage-expenses/mobile",
+    "test": "npm test -w @manage-expenses/core",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  }
+}

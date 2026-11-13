@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { buildInsights, computeBudget, currentMonth, filterExpenses, formatMoney, monthRange, useApp } from '@manage-expenses/core';
+import { buildInsights, computeBudget, currentMonth, filterExpenses, monthRange, useApp, useMoney } from '@manage-expenses/core';
 import { StatCard } from '../components/StatCard';
 import { CategoryChart } from '../components/CategoryChart';
 import { BudgetAlerts } from '../components/BudgetAlerts';
@@ -16,6 +16,7 @@ const RECENT_LIMIT = 5;
 
 export function HomePage() {
   const { user, expenses, categories, categoryName, payments, categoryBudgets } = useApp();
+  const money = useMoney();
   const { today, activeReminders } = useReminders();
   const month = currentMonth();
   const monthExpenses = filterExpenses(expenses, monthRange(month));
@@ -57,11 +58,11 @@ export function HomePage() {
       )}
 
       <div className="grid">
-        <StatCard label="Spent this month" value={formatMoney(spent)} hint={`${monthExpenses.length} transaction${monthExpenses.length === 1 ? '' : 's'}`} />
-        <StatCard label="Spending limit" value={hasIncome ? formatMoney(budget.spendLimit) : '\u2014'} hint={hasIncome ? 'after tax and savings' : <Link to="/profile">Set your income</Link>} />
+        <StatCard label="Spent this month" value={money(spent)} hint={`${monthExpenses.length} transaction${monthExpenses.length === 1 ? '' : 's'}`} />
+        <StatCard label="Spending limit" value={hasIncome ? money(budget.spendLimit) : '\u2014'} hint={hasIncome ? 'after tax and savings' : <Link to="/profile">Set your income</Link>} />
         <StatCard
           label="Remaining"
-          value={hasIncome ? formatMoney(remaining) : '\u2014'}
+          value={hasIncome ? money(remaining) : '\u2014'}
           tone={!hasIncome ? 'default' : remaining < 0 ? 'danger' : percent >= 80 ? 'warn' : 'good'}
         />
         <StatCard
@@ -88,7 +89,7 @@ export function HomePage() {
               <div style={{ width: `${Math.min(percent, 100)}%` }} />
             </div>
             <p className="muted">
-              {Math.round(percent)}% of {formatMoney(budget.spendLimit)} used (income {formatMoney(budget.gross)} &minus; tax {formatMoney(budget.tax)} &minus; savings {formatMoney(budget.savings)})
+              {Math.round(percent)}% of {money(budget.spendLimit)} used (income {money(budget.gross)} &minus; tax {money(budget.tax)} &minus; savings {money(budget.savings)})
             </p>
           </>
         ) : (

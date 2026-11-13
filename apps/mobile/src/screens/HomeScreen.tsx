@@ -1,11 +1,12 @@
 import { Text, View } from 'react-native';
-import { buildInsights, computeBudget, currentMonth, filterExpenses, formatMoney, monthRange, useApp } from '@manage-expenses/core';
+import { buildInsights, computeBudget, currentMonth, filterExpenses, monthRange, useApp, useMoney } from '@manage-expenses/core';
 import { INSIGHT_COLORS, styles } from '../styles';
 import { Onboarding } from '../Onboarding';
 import { Button } from '../ui';
 
 export function HomeScreen({ onNavigate }: { onNavigate?: (screen: 'expenses' | 'payments' | 'categories') => void }) {
   const { user, expenses, categories, categoryName, payments, categoryBudgets } = useApp();
+  const money = useMoney();
   const month = currentMonth();
   const { from, to } = monthRange(month);
   const monthExpenses = filterExpenses(expenses, { from, to });
@@ -26,13 +27,13 @@ export function HomeScreen({ onNavigate }: { onNavigate?: (screen: 'expenses' | 
       <Onboarding />
       <View style={[styles.card, { backgroundColor: '#143c35', borderColor: '#143c35' }]}>
         <Text style={{ color: '#b7decf' }}>{hasIncome ? 'Available to spend this month' : 'This month’s spending'}</Text>
-        <Text style={[styles.stat, { color: '#fff', fontSize: 36, marginVertical: 8 }]}>{formatMoney(hasIncome ? budget.spendLimit - spent : spent)}</Text>
-        <Text style={{ color: '#d3e9e1' }}>{formatMoney(spent)} spent · {monthExpenses.length} transactions</Text>
+        <Text style={[styles.stat, { color: '#fff', fontSize: 36, marginVertical: 8 }]}>{money(hasIncome ? budget.spendLimit - spent : spent)}</Text>
+        <Text style={{ color: '#d3e9e1' }}>{money(spent)} spent · {monthExpenses.length} transactions</Text>
         {hasIncome ? (
           <>
             <View style={styles.bar}><View style={[styles.barFill, { width: `${Math.min(percent, 100)}%`, backgroundColor: barColor }]} /></View>
             <Text style={{ color: '#d3e9e1' }}>
-              {Math.round(percent)}% of your {formatMoney(budget.spendLimit)} spending plan
+              {Math.round(percent)}% of your {money(budget.spendLimit)} spending plan
             </Text>
           </>
         ) : (
@@ -49,9 +50,9 @@ export function HomeScreen({ onNavigate }: { onNavigate?: (screen: 'expenses' | 
           const used = totals.get(id) || 0;
           const ratio = used / limit;
           return <View key={id} style={{ marginBottom: 12 }}>
-            <View style={styles.item}><Text style={styles.grow}>{categoryName(id)}</Text><Text>{formatMoney(used)} / {formatMoney(limit)}</Text></View>
+            <View style={styles.item}><Text style={styles.grow}>{categoryName(id)}</Text><Text>{money(used)} / {money(limit)}</Text></View>
             <View style={styles.bar}><View style={[styles.barFill, { width: `${Math.min(ratio * 100, 100)}%`, backgroundColor: ratio >= 1 ? '#b91c1c' : ratio >= 0.8 ? '#b7791f' : '#176b53' }]} /></View>
-            <Text style={ratio >= 1 ? styles.error : styles.muted}>{ratio >= 1 ? 'Budget reached or exceeded' : ratio >= 0.8 ? 'Heads up: 80% or more used' : `${formatMoney(limit - used)} remaining`}</Text>
+            <Text style={ratio >= 1 ? styles.error : styles.muted}>{ratio >= 1 ? 'Budget reached or exceeded' : ratio >= 0.8 ? 'Heads up: 80% or more used' : `${money(limit - used)} remaining`}</Text>
           </View>;
         })}
         {onNavigate && <Button title="Manage category budgets" onPress={() => onNavigate('categories')} />}
@@ -61,7 +62,7 @@ export function HomeScreen({ onNavigate }: { onNavigate?: (screen: 'expenses' | 
         {!payments.length && <Text style={styles.muted}>Plan your next bill so nothing catches you off guard.</Text>}
         {[...payments].sort((a, b) => a.dueDate.localeCompare(b.dueDate)).slice(0, 3).map((payment) => <View key={payment.id} style={styles.item}>
           <View style={styles.grow}><Text>{payment.title}</Text><Text style={styles.muted}>Due {payment.dueDate} · {payment.recurrence}</Text></View>
-          <Text>{formatMoney(payment.amount)}</Text>
+          <Text>{money(payment.amount)}</Text>
         </View>)}
       </View>
 
@@ -76,7 +77,7 @@ export function HomeScreen({ onNavigate }: { onNavigate?: (screen: 'expenses' | 
         <Text style={styles.h2}>Top categories</Text>
         {byCategory.length === 0 && <Text>No expenses this month.</Text>}
         {byCategory.map(([id, amount]) => (
-          <View key={id} style={styles.item}><Text>{categoryName(id)}</Text><Text>{formatMoney(amount)}</Text></View>
+          <View key={id} style={styles.item}><Text>{categoryName(id)}</Text><Text>{money(amount)}</Text></View>
         ))}
       </View>
 
@@ -85,7 +86,7 @@ export function HomeScreen({ onNavigate }: { onNavigate?: (screen: 'expenses' | 
         {monthExpenses.length === 0 && <Text>Nothing yet.</Text>}
         {[...monthExpenses].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5).map((e) => (
           <View key={e.id} style={styles.item}>
-            <Text>{e.date} · {categoryName(e.categoryId)}</Text><Text>{formatMoney(e.amount)}</Text>
+            <Text>{e.date} · {categoryName(e.categoryId)}</Text><Text>{money(e.amount)}</Text>
           </View>
         ))}
       </View>

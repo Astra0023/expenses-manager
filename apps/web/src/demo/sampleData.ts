@@ -36,7 +36,7 @@ export function createDemoData(today = todayISO()): DemoData {
     { id: 'demo-e8', amount: 58.2, categoryId: 'demo-food', date: day(9), note: 'Dinner out' },
   ].sort((a, b) => b.date.localeCompare(a.date));
   return {
-    profile: { firstName: 'Alex', lastName: 'Sample', monthlyIncome: 4200, taxRate: 20, savingsRate: 15 },
+    profile: { firstName: 'Alex', lastName: 'Sample', currency: 'USD', monthlyIncome: 4200, taxRate: 20, savingsRate: 15 },
     categories: CATEGORIES,
     expenses,
     payments: [

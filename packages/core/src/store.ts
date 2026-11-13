@@ -1,6 +1,7 @@
 import { createContext, createElement, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { AuthService } from './auth';
 import { createAppDataService } from './data';
+import { formatMoney } from './expenses';
 import type { Account, Category, Expense, KeyValueStorage, NewExpense, NewPayment, Payment, Profile, RandomBytes } from './types';
 
 export interface AppContextValue {
@@ -40,6 +41,11 @@ export function useApp(): AppContextValue {
   const ctx = useContext(AppContext);
   if (!ctx) throw new Error('useApp must be used inside AppProvider');
   return ctx;
+}
+
+export function useMoney(): (amount: number) => string {
+  const { user } = useApp();
+  return useCallback((amount: number) => formatMoney(amount, user.currency), [user.currency]);
 }
 
 interface AppProviderProps {

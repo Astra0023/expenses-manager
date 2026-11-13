@@ -5,6 +5,7 @@ import { todayISO, validateExpense } from './expenses';
 import { nextPaymentDate, validatePayment } from './payments';
 import {
   DEFAULT_CATEGORY_NAMES,
+  DEFAULT_CURRENCY,
   type Account, type Category, type Expense, type KeyValueStorage, type NewExpense,
   type NewPayment, type Payment, type Profile, type RandomBytes,
 } from './types';
@@ -105,6 +106,7 @@ function personal(value: unknown): PersonalProfile {
   const p = object(value);
   const profile: PersonalProfile = {
     firstName: p.firstName as string, lastName: p.lastName as string,
+    currency: (p.currency ?? DEFAULT_CURRENCY) as PersonalProfile['currency'],
     monthlyIncome: p.monthlyIncome as number, taxRate: p.taxRate as number, savingsRate: p.savingsRate as number,
     ...(p.avatar !== undefined ? { avatar: p.avatar as string } : {}),
   };

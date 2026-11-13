@@ -11,6 +11,7 @@ import {
   createCategoryService,
   createExpenseService,
   filterExpenses,
+  formatMoney,
   monthRange,
   reportMonthLabel,
   SESSION_DURATION_MS,
@@ -41,14 +42,17 @@ describe('auth & profile', () => {
     await expect(auth.login('ann', 'wrong-pass')).rejects.toThrow();
     await expect(auth.register({ ...reg, username: 'ANN' })).rejects.toThrow('exists');
 
-    const updated = await auth.updateProfile(acc.id, { firstName: 'Anna', lastName: 'Lee', monthlyIncome: 3000, taxRate: 20, savingsRate: 10 });
+    expect(acc.currency).toBe('USD');
+    const updated = await auth.updateProfile(acc.id, { firstName: 'Anna', lastName: 'Lee', currency: 'EUR', monthlyIncome: 3000, taxRate: 20, savingsRate: 10 });
     expect(updated.monthlyIncome).toBe(3000);
+    expect(updated.currency).toBe('EUR');
     await expect(auth.updateProfile(acc.id, { ...updated, taxRate: 120 })).rejects.toThrow('Tax rate');
 
     await expect(auth.changePassword(acc.id, 'nope-nope', 'new-password')).rejects.toThrow('incorrect');
     await auth.changePassword(acc.id, 'secret-pass', 'new-password');
     await expect(auth.login('ann', 'secret-pass')).rejects.toThrow();
     expect((await auth.login('ann', 'new-password')).firstName).toBe('Anna');
+    expect((await auth.login('ann', 'new-password')).currency).toBe('EUR');
 
     const png = 'data:image/png;base64,AAAA';
     expect((await auth.updateAvatar(acc.id, png)).avatar).toBe(png);
@@ -170,7 +174,7 @@ describe('expenses & reports', () => {
   });
 
   it('produces an over-budget insight', () => {
-    const profile = { firstName: 'A', lastName: 'B', monthlyIncome: 100, taxRate: 0, savingsRate: 0 };
+    const profile = { firstName: 'A', lastName: 'B', currency: 'USD' as const, monthlyIncome: 100, taxRate: 0, savingsRate: 0 };
     const insights = buildInsights([{ id: '1', amount: 150, categoryId: 'Food', note: '', date: '2026-11-02' }], [], profile, '2026-11');
     expect(insights[0].level).toBe('danger');
   });
@@ -216,7 +220,7 @@ describe('encryption at rest', () => {
     const s = memory();
     const auth = createAuthService(s, rnd);
     const acc = await auth.register(reg);
-    await auth.updateProfile(acc.id, { firstName: 'Zed', lastName: 'Lee', monthlyIncome: 4321, taxRate: 0, savingsRate: 0 });
+    await auth.updateProfile(acc.id, { firstName: 'Zed', lastName: 'Lee', currency: 'USD', monthlyIncome: 4321, taxRate: 0, savingsRate: 0 });
     const exp = createExpenseService(auth.encryptedStorage(s), rnd, acc.id);
     await exp.add({ amount: 77.7, categoryId: 'Food', note: 'secret lunch', date: '2026-01-01' });
 
@@ -229,6 +233,13 @@ describe('encryption at rest', () => {
     const again = await auth.login('ann', 'secret-pass');
     expect(again.firstName).toBe('Zed');
     expect(await createExpenseService(auth.encryptedStorage(s), rnd, acc.id).list()).toHaveLength(1);
+  });
+
+  describe('currency formatting', () => {
+    it('formats amounts with the selected currency and rejects unsupported currencies', () => {
+      expect(formatMoney(1234.5, 'EUR')).toBe(new Intl.NumberFormat(undefined, { style: 'currency', currency: 'EUR' }).format(1234.5));
+      expect(() => formatMoney(10, 'XXX' as never)).toThrow('Unsupported currency');
+    });
   });
 
   it('encrypts data from plain-text accounts on first login', async () => {

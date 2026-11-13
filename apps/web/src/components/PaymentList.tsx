@@ -1,4 +1,4 @@
-import { formatMoney, type Payment } from '@manage-expenses/core';
+import { useMoney, type Payment } from '@manage-expenses/core';
 import { formatDate } from '../utils/dates';
 import { RECURRENCE_LABELS, STATUS_LABELS, describeDue, paymentStatus } from '../utils/payments';
 
@@ -12,6 +12,7 @@ interface PaymentListProps {
 }
 
 export function PaymentList({ payments, today, categoryName, busyId, onMarkPaid, onRemove }: PaymentListProps) {
+  const money = useMoney();
   return (
     <ul className="payment-list">
       {payments.map((p) => {
@@ -26,7 +27,7 @@ export function PaymentList({ payments, today, categoryName, busyId, onMarkPaid,
               </span>
             </div>
             <div className="payment-meta">
-              <span className="payment-amount">{formatMoney(p.amount)}</span>
+              <span className="payment-amount">{money(p.amount)}</span>
               <span className={`badge status-${status}`} title={STATUS_LABELS[status]}>{describeDue(p, today)}</span>
             </div>
             {(onMarkPaid || onRemove) && (

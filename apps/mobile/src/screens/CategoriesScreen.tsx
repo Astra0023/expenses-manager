@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
-import { currentMonth, formatMoney, useApp } from '@manage-expenses/core';
+import { currentMonth, useApp, useMoney } from '@manage-expenses/core';
 import { Button, Field } from '../ui';
 import { styles } from '../styles';
 
 export function CategoriesScreen() {
   const { categories, expenses, categoryBudgets, setCategoryBudget, addCategory, renameCategory, setCategoryActive } = useApp();
+  const money = useMoney();
   const [name, setName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -45,7 +46,7 @@ export function CategoriesScreen() {
           const limit = categoryBudgets[category.id] || 0;
           const spent = expenses.filter((expense) => expense.categoryId === category.id && expense.date.startsWith(currentMonth())).reduce((sum, expense) => sum + expense.amount, 0);
           return <View key={category.id} style={{ marginBottom: 12 }}>
-            <Text>{category.name} · {formatMoney(spent)} spent{limit ? ` / ${formatMoney(limit)}` : ' · no limit'}</Text>
+            <Text>{category.name} · {money(spent)} spent{limit ? ` / ${money(limit)}` : ' · no limit'}</Text>
             {limit > 0 && spent >= limit * 0.8 && <Text style={spent >= limit ? styles.error : styles.muted}>{spent >= limit ? 'Budget reached or exceeded' : 'Heads up: 80% or more used'}</Text>}
             <Pressable onPress={() => { setBudgetCategory(category.id); setBudgetAmount(String(limit)); }}><Text style={styles.link}>Set limit</Text></Pressable>
             {budgetCategory === category.id && <>

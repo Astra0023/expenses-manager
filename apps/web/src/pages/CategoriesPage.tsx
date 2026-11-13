@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { currentMonth, filterExpenses, formatMoney, monthRange, useApp, type Category } from '@manage-expenses/core';
+import { currentMonth, filterExpenses, monthRange, useApp, useMoney, type Category } from '@manage-expenses/core';
 import { budgetLevel, totalsByCategory } from '../utils/budgets';
 import { errorMessage } from '../utils/errors';
 
@@ -48,6 +48,7 @@ function BudgetCell({ category, budget, spent, onSave }: BudgetCellProps) {
 
 export function CategoriesPage() {
   const { categories, expenses, categoryBudgets, addCategory, renameCategory, setCategoryActive, setCategoryBudget } = useApp();
+  const money = useMoney();
   const [name, setName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -104,7 +105,7 @@ export function CategoriesPage() {
               <tr key={c.id}>
                 <td data-label="Name">{c.name}</td>
                 <td data-label="Status"><span className={`badge ${c.status}`}>{c.status}</span></td>
-                <td data-label="This month">{formatMoney(spentThisMonth.get(c.id) ?? 0)}</td>
+                <td data-label="This month">{money(spentThisMonth.get(c.id) ?? 0)}</td>
                 <td data-label="Monthly limit">
                   <BudgetCell
                     key={`${c.id}:${categoryBudgets[c.id] ?? 0}`}

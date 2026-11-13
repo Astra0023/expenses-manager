@@ -1,12 +1,13 @@
 import { useRef, useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
-import { computeBudget, formatMoney, useApp } from '@manage-expenses/core';
+import { computeBudget, CURRENCY_OPTIONS, isCurrencyCode, useApp, useMoney } from '@manage-expenses/core';
 import { resizeImageToDataUrl } from '../image';
 import { BackupPanel } from '../components/BackupPanel';
 import { errorMessage } from '../utils/errors';
 
 function ProfileDetails() {
   const { user, updateProfile, updateAvatar, changePassword } = useApp();
+  const money = useMoney();
   const fileRef = useRef<HTMLInputElement>(null);
   const [avatarError, setAvatarError] = useState('');
 
@@ -23,6 +24,7 @@ function ProfileDetails() {
   };
   const [firstName, setFirstName] = useState(user.firstName);
   const [lastName, setLastName] = useState(user.lastName);
+  const [currency, setCurrency] = useState(user.currency);
   const [income, setIncome] = useState(String(user.monthlyIncome));
   const [taxRate, setTaxRate] = useState(String(user.taxRate));
   const [savingsRate, setSavingsRate] = useState(String(user.savingsRate));
@@ -44,6 +46,7 @@ function ProfileDetails() {
       await updateProfile({
         firstName,
         lastName,
+        currency,
         monthlyIncome: Number(income),
         taxRate: Number(taxRate),
         savingsRate: Number(savingsRate),
@@ -89,6 +92,11 @@ function ProfileDetails() {
           <label>First name<input value={firstName} onChange={(e) => setFirstName(e.target.value)} required /></label>
           <label>Last name<input value={lastName} onChange={(e) => setLastName(e.target.value)} required /></label>
           <label>Username<input value={user.username} disabled /></label>
+          <label>Currency
+            <select value={currency} onChange={(e) => { if (isCurrencyCode(e.target.value)) setCurrency(e.target.value); }}>
+              {CURRENCY_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
+          </label>
         </div>
         <div className="row" style={{ marginTop: 12 }}>
           <label>Monthly income<input type="number" min="0" step="0.01" value={income} onChange={(e) => setIncome(e.target.value)} /></label>
@@ -96,6 +104,7 @@ function ProfileDetails() {
           <label>Savings (% of net)<input type="number" min="0" max="100" step="0.01" value={savingsRate} onChange={(e) => setSavingsRate(e.target.value)} /></label>
           <button>Save profile</button>
         </div>
+        <p className="muted">Changing currency only changes how amounts are displayed; existing values are not converted.</p>
         {profileMsg && <p role="status" className={profileMsg.ok ? 'success' : 'error'}>{profileMsg.text}</p>}
       </form>
 
@@ -103,11 +112,11 @@ function ProfileDetails() {
         <h2>Tax & spending calculator</h2>
         <p className="muted">Updates live from the income, tax and savings values above.</p>
         <table><tbody>
-          <tr><td>Gross income</td><td>{formatMoney(budget.gross)}</td></tr>
-          <tr><td>Tax ({Number(taxRate) || 0}%)</td><td>&minus; {formatMoney(budget.tax)}</td></tr>
-          <tr><td>Net income</td><td>{formatMoney(budget.net)}</td></tr>
-          <tr><td>Savings ({Number(savingsRate) || 0}% of net)</td><td>&minus; {formatMoney(budget.savings)}</td></tr>
-          <tr><th>Recommended spending per month</th><th>{formatMoney(budget.spendLimit)}</th></tr>
+          <tr><td>Gross income</td><td>{money(budget.gross)}</td></tr>
+          <tr><td>Tax ({Number(taxRate) || 0}%)</td><td>&minus; {money(budget.tax)}</td></tr>
+          <tr><td>Net income</td><td>{money(budget.net)}</td></tr>
+          <tr><td>Savings ({Number(savingsRate) || 0}% of net)</td><td>&minus; {money(budget.savings)}</td></tr>
+          <tr><th>Recommended spending per month</th><th>{money(budget.spendLimit)}</th></tr>
         </tbody></table>
       </section>
 

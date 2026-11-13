@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Alert, Linking, Text, View } from 'react-native';
-import { formatMoney, todayISO, useApp, type Payment } from '@manage-expenses/core';
+import { todayISO, useApp, useMoney, type Payment } from '@manage-expenses/core';
 import { Button, Field, Select } from '../ui';
 import { styles } from '../styles';
 import type { ReminderControls } from '../notifications';
 
 export function PaymentsScreen({ reminders }: { reminders: ReminderControls }) {
   const { payments, activeCategories, categoryName, addPayment, removePayment, markPaymentPaid } = useApp();
+  const money = useMoney();
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
@@ -34,7 +35,7 @@ export function PaymentsScreen({ reminders }: { reminders: ReminderControls }) {
     await addPayment({ title: title.trim(), amount: Number(amount), categoryId: category || activeCategories[0]?.id || '', dueDate: date, recurrence, reminderDays: Number(days) });
     setTitle(''); setAmount('');
   }, 'Payment planned. Reminder scheduling status appears below.');
-  const confirmPaid = (payment: Payment) => Alert.alert('Mark payment paid?', `${payment.title}: ${formatMoney(payment.amount)}. This records an expense${payment.recurrence !== 'none' ? ' and advances the next due date' : ' and removes the planned payment'}.`, [
+  const confirmPaid = (payment: Payment) => Alert.alert('Mark payment paid?', `${payment.title}: ${money(payment.amount)}. This records an expense${payment.recurrence !== 'none' ? ' and advances the next due date' : ' and removes the planned payment'}.`, [
     { text: 'Cancel', style: 'cancel' },
     { text: 'Mark paid', onPress: () => void run(() => markPaymentPaid(payment.id), 'Payment recorded.') },
   ]);
@@ -67,7 +68,7 @@ export function PaymentsScreen({ reminders }: { reminders: ReminderControls }) {
       <Text style={styles.h2}>Upcoming & overdue</Text>
       {!payments.length && <Text style={styles.muted}>No planned payments. Add a bill or annual subscription above.</Text>}
       {[...payments].sort((a, b) => a.dueDate.localeCompare(b.dueDate)).map((payment) => <View key={payment.id} style={{ borderBottomWidth: 1, borderColor: '#e4ece8', paddingVertical: 14 }}>
-        <Text style={styles.h2}>{payment.title} · {formatMoney(payment.amount)}</Text>
+        <Text style={styles.h2}>{payment.title} · {money(payment.amount)}</Text>
         <Text style={payment.dueDate < todayISO() ? styles.error : styles.muted}>{payment.dueDate < todayISO() ? 'Overdue · ' : ''}{payment.dueDate} · {categoryName(payment.categoryId)}</Text>
         <Text style={[styles.muted, { marginBottom: 10 }]}>{payment.recurrence === 'none' ? 'One time' : `Repeats ${payment.recurrence}`} · remind {payment.reminderDays} days before</Text>
         <Button title="Mark paid" disabled={busy} onPress={() => confirmPaid(payment)} />

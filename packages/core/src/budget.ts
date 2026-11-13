@@ -1,5 +1,5 @@
 import { formatMoney, monthRange, shiftMonth } from './expenses';
-import type { Category, Expense, Profile } from './types';
+import { DEFAULT_CURRENCY, type Category, type CurrencyCode, type Expense, type Profile } from './types';
 
 export interface Budget {
   gross: number;
@@ -45,6 +45,7 @@ export function categoryBudgetAlerts(
   categories: Category[],
   budgets: Record<string, number>,
   month: string,
+  currency: CurrencyCode = DEFAULT_CURRENCY,
 ): Insight[] {
   const { from, to } = monthRange(month);
   return Object.entries(budgets).flatMap(([id, limit]): Insight[] => {
@@ -55,7 +56,7 @@ export function categoryBudgetAlerts(
     if (spent < limit * 0.8) return [];
     return [{
       level: spent >= limit ? 'danger' : 'warn',
-      text: `${category.name}: ${Math.round(spent / limit * 100)}% of monthly category budget used (${formatMoney(spent)} / ${formatMoney(limit)}).`,
+      text: `${category.name}: ${Math.round(spent / limit * 100)}% of monthly category budget used (${formatMoney(spent, currency)} / ${formatMoney(limit, currency)}).`,
     }];
   });
 }
@@ -69,7 +70,7 @@ export function buildInsights(
   now: Date = new Date(),
   categoryBudgets: Record<string, number> = {},
 ): Insight[] {
-  const out: Insight[] = categoryBudgetAlerts(expenses, categories, categoryBudgets, month);
+  const out: Insight[] = categoryBudgetAlerts(expenses, categories, categoryBudgets, month, profile.currency);
   const { from, to } = monthRange(month);
   const inMonth = expenses.filter((e) => e.date >= from && e.date <= to);
   const spent = inMonth.reduce((s, e) => s + e.amount, 0);
@@ -80,9 +81,9 @@ export function buildInsights(
   } else {
     const pct = budget.spendLimit > 0 ? (spent / budget.spendLimit) * 100 : 100;
     if (spent > budget.spendLimit) {
-      out.push({ level: 'danger', text: `You are ${formatMoney(spent - budget.spendLimit)} over your monthly spending limit.` });
+      out.push({ level: 'danger', text: `You are ${formatMoney(spent - budget.spendLimit, profile.currency)} over your monthly spending limit.` });
     } else if (pct >= 80) {
-      out.push({ level: 'warn', text: `You have used ${Math.round(pct)}% of your monthly limit; ${formatMoney(budget.spendLimit - spent)} left.` });
+      out.push({ level: 'warn', text: `You have used ${Math.round(pct)}% of your monthly limit; ${formatMoney(budget.spendLimit - spent, profile.currency)} left.` });
     } else {
       out.push({ level: 'good', text: `On track: ${Math.round(pct)}% of your monthly limit used.` });
     }

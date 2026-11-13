@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { formatMoney, todayISO, useApp, type Payment } from '@manage-expenses/core';
+import { todayISO, useApp, useMoney, type Payment } from '@manage-expenses/core';
 import { PaymentList } from '../components/PaymentList';
 import { useReminders } from '../reminders/ReminderProvider';
 import { errorMessage } from '../utils/errors';
@@ -46,6 +46,7 @@ function NotificationSettings() {
 
 export function PaymentsPage() {
   const { payments, activeCategories, categories, categoryName, addPayment, removePayment, markPaymentPaid } = useApp();
+  const money = useMoney();
   const { today } = useReminders();
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
@@ -103,12 +104,12 @@ export function PaymentsPage() {
 
   const handleMarkPaid = (p: Payment) => {
     void runOnPayment(p, () => markPaymentPaid(p.id), p.recurrence === 'none'
-      ? `Marked \u201c${p.title}\u201d as paid and recorded ${formatMoney(p.amount)} as an expense today.`
-      : `Marked \u201c${p.title}\u201d as paid, recorded ${formatMoney(p.amount)} as an expense today and moved it to the next due date.`);
+      ? `Marked \u201c${p.title}\u201d as paid and recorded ${money(p.amount)} as an expense today.`
+      : `Marked \u201c${p.title}\u201d as paid, recorded ${money(p.amount)} as an expense today and moved it to the next due date.`);
   };
 
   const handleRemove = (p: Payment) => {
-    if (!window.confirm(`Delete the scheduled payment \u201c${p.title}\u201d (${formatMoney(p.amount)})? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete the scheduled payment \u201c${p.title}\u201d (${money(p.amount)})? This cannot be undone.`)) return;
     void runOnPayment(p, () => removePayment(p.id), `Deleted \u201c${p.title}\u201d.`);
   };
 
@@ -162,7 +163,7 @@ export function PaymentsPage() {
 
       <section className="card" aria-labelledby="later-title">
         <h2 id="later-title">Scheduled</h2>
-        {payments.length > 0 && <p className="muted">Recurring commitments average about {formatMoney(monthlyCommitted)} per month.</p>}
+        {payments.length > 0 && <p className="muted">Recurring commitments average about {money(monthlyCommitted)} per month.</p>}
         {later.length === 0 ? <p className="empty">No other scheduled payments.</p> : (
           <PaymentList payments={later} today={today} categoryName={categoryName} busyId={busyId} onMarkPaid={handleMarkPaid} onRemove={handleRemove} />
         )}

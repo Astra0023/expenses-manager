@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { computeBudget, formatMoney, todayISO, useApp } from '@manage-expenses/core';
+import { computeBudget, todayISO, useApp, useMoney } from '@manage-expenses/core';
 import { errorMessage } from '../utils/errors';
 import { markOnboarded } from '../utils/onboarding';
 
@@ -9,6 +9,7 @@ const STEPS = ['Monthly budget', 'Categories', 'First expense'] as const;
 
 export function OnboardingPage() {
   const { user, categories, categoryBudgets, updateProfile, addCategory, setCategoryActive, setCategoryBudget, addExpense } = useApp();
+  const money = useMoney();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [isBusy, setIsBusy] = useState(false);
@@ -53,6 +54,7 @@ export function OnboardingPage() {
       await updateProfile({
         firstName: user.firstName,
         lastName: user.lastName,
+        currency: user.currency,
         monthlyIncome: Number(income) || 0,
         taxRate: Number(taxRate) || 0,
         savingsRate: Number(savingsRate) || 0,
@@ -118,7 +120,7 @@ export function OnboardingPage() {
             <label>Tax rate (%)<input type="number" min="0" max="100" step="0.01" value={taxRate} onChange={(e) => setTaxRate(e.target.value)} /></label>
             <label>Savings (% of net)<input type="number" min="0" max="100" step="0.01" value={savingsRate} onChange={(e) => setSavingsRate(e.target.value)} /></label>
           </div>
-          <p className="callout" aria-live="polite">Suggested spending limit: <strong>{formatMoney(preview.spendLimit)}</strong> per month</p>
+          <p className="callout" aria-live="polite">Suggested spending limit: <strong>{money(preview.spendLimit)}</strong> per month</p>
           <div className="row">
             <button disabled={isBusy}>{isBusy ? 'Saving\u2026' : 'Save and continue'}</button>
             <button type="button" className="link" onClick={() => setStep(1)}>Skip this step</button>

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { formatMoney, type Expense } from '@manage-expenses/core';
+import { useMoney, type Expense } from '@manage-expenses/core';
 import { formatDate } from '../utils/dates';
 
 interface ExpenseTableProps {
@@ -12,6 +12,7 @@ interface ExpenseTableProps {
 
 /** Table on wide screens; each row collapses into a labelled card on small screens. */
 export function ExpenseTable({ expenses, categoryName, caption, showNote = true, renderActions }: ExpenseTableProps) {
+  const money = useMoney();
   return (
     <table className="responsive">
       <caption className="sr-only">{caption}</caption>
@@ -30,7 +31,7 @@ export function ExpenseTable({ expenses, categoryName, caption, showNote = true,
             <td data-label="Date">{formatDate(e.date)}</td>
             <td data-label="Category">{categoryName(e.categoryId)}</td>
             {showNote && <td data-label="Note">{e.note || <span className="muted">&mdash;</span>}</td>}
-            <td data-label="Amount" className="num">{formatMoney(e.amount)}</td>
+            <td data-label="Amount" className="num">{money(e.amount)}</td>
             {renderActions && <td className="actions">{renderActions(e)}</td>}
           </tr>
         ))}

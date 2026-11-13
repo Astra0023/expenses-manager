@@ -1,4 +1,4 @@
-import { formatMoney } from '@manage-expenses/core';
+import { useMoney } from '@manage-expenses/core';
 import type { CategoryBudgetStatus } from '../utils/budgets';
 
 interface BudgetAlertsProps {
@@ -9,6 +9,7 @@ interface BudgetAlertsProps {
 const LEVEL_TEXT = { ok: 'On track', warn: 'Close to limit', over: 'Over budget' } as const;
 
 export function BudgetAlerts({ statuses, categoryName }: BudgetAlertsProps) {
+  const money = useMoney();
   return (
     <ul className="budget-list">
       {statuses.map((s) => (
@@ -29,8 +30,8 @@ export function BudgetAlerts({ statuses, categoryName }: BudgetAlertsProps) {
             <div style={{ width: `${Math.min(s.percent, 100)}%` }} />
           </div>
           <p className="muted">
-            {formatMoney(s.spent)} of {formatMoney(s.budget)}
-            {s.level === 'over' ? ` \u2014 ${formatMoney(s.spent - s.budget)} over` : ` \u2014 ${formatMoney(s.budget - s.spent)} left`}
+            {money(s.spent)} of {money(s.budget)}
+            {s.level === 'over' ? ` \u2014 ${money(s.spent - s.budget)} over` : ` \u2014 ${money(s.budget - s.spent)} left`}
           </p>
         </li>
       ))}

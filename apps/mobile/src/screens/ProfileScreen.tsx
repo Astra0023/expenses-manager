@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { computeBudget, formatMoney, useApp } from '@manage-expenses/core';
-import { Avatar, Button, Field } from '../ui';
+import { computeBudget, CURRENCY_OPTIONS, isCurrencyCode, useApp, useMoney } from '@manage-expenses/core';
+import { Avatar, Button, Field, Select } from '../ui';
 import { pickAvatar } from '../image';
 import { styles } from '../styles';
 import { BackupPanel } from '../BackupPanel';
@@ -20,6 +20,7 @@ function Line({ label, value, bold }: { label: string; value: string; bold?: boo
 
 export function ProfileScreen() {
   const { user, updateProfile, updateAvatar, changePassword } = useApp();
+  const money = useMoney();
   const [avatarError, setAvatarError] = useState('');
 
   const handleAvatar = async () => {
@@ -33,14 +34,15 @@ export function ProfileScreen() {
   };
   const [firstName, setFirstName] = useState(user.firstName);
   const [lastName, setLastName] = useState(user.lastName);
+  const [currency, setCurrency] = useState(user.currency);
   const [income, setIncome] = useState(String(user.monthlyIncome));
   const [taxRate, setTaxRate] = useState(String(user.taxRate));
   const [savingsRate, setSavingsRate] = useState(String(user.savingsRate));
   const [profileMsg, setProfileMsg] = useState<Message>(null);
   useEffect(() => {
-    setFirstName(user.firstName); setLastName(user.lastName);
+    setFirstName(user.firstName); setLastName(user.lastName); setCurrency(user.currency);
     setIncome(String(user.monthlyIncome)); setTaxRate(String(user.taxRate)); setSavingsRate(String(user.savingsRate));
-  }, [user.firstName, user.lastName, user.monthlyIncome, user.taxRate, user.savingsRate]);
+  }, [user.firstName, user.lastName, user.currency, user.monthlyIncome, user.taxRate, user.savingsRate]);
 
   const [currentPw, setCurrentPw] = useState('');
   const [newPw, setNewPw] = useState('');
@@ -54,7 +56,7 @@ export function ProfileScreen() {
 
   const handleProfile = async () => {
     try {
-      await updateProfile({ firstName, lastName, monthlyIncome: Number(income), taxRate: Number(taxRate), savingsRate: Number(savingsRate) });
+      await updateProfile({ firstName, lastName, currency, monthlyIncome: Number(income), taxRate: Number(taxRate), savingsRate: Number(savingsRate) });
       setProfileMsg({ ok: true, text: 'Profile saved' });
     } catch (err) {
       setProfileMsg({ ok: false, text: err instanceof Error ? err.message : 'Failed to save' });
@@ -85,6 +87,8 @@ export function ProfileScreen() {
         <Text style={styles.h2}>Details & income</Text>
         <Field label="First name" value={firstName} onChangeText={setFirstName} />
         <Field label="Last name" value={lastName} onChangeText={setLastName} />
+        <Select label="Currency" value={currency} options={CURRENCY_OPTIONS.map((option) => ({ value: option.value, label: option.label }))} onChange={(value) => { if (isCurrencyCode(value)) setCurrency(value); }} />
+        <Text style={styles.muted}>Changing currency only changes how amounts are displayed; existing values are not converted.</Text>
         <Field label="Monthly income" keyboardType="decimal-pad" value={income} onChangeText={setIncome} />
         <Field label="Tax rate (%)" keyboardType="decimal-pad" value={taxRate} onChangeText={setTaxRate} />
         <Field label="Savings (% of net)" keyboardType="decimal-pad" value={savingsRate} onChangeText={setSavingsRate} />
@@ -94,11 +98,11 @@ export function ProfileScreen() {
 
       <View style={styles.card}>
         <Text style={styles.h2}>Tax & spending calculator</Text>
-        <Line label="Gross income" value={formatMoney(budget.gross)} />
-        <Line label={`Tax (${Number(taxRate) || 0}%)`} value={`− ${formatMoney(budget.tax)}`} />
-        <Line label="Net income" value={formatMoney(budget.net)} />
-        <Line label={`Savings (${Number(savingsRate) || 0}%)`} value={`− ${formatMoney(budget.savings)}`} />
-        <Line label="Spend per month" value={formatMoney(budget.spendLimit)} bold />
+        <Line label="Gross income" value={money(budget.gross)} />
+        <Line label={`Tax (${Number(taxRate) || 0}%)`} value={`− ${money(budget.tax)}`} />
+        <Line label="Net income" value={money(budget.net)} />
+        <Line label={`Savings (${Number(savingsRate) || 0}%)`} value={`− ${money(budget.savings)}`} />
+        <Line label="Spend per month" value={money(budget.spendLimit)} bold />
       </View>
 
       <View style={styles.card}>

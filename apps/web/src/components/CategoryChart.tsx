@@ -1,4 +1,4 @@
-import { formatMoney } from '@manage-expenses/core';
+import { useMoney } from '@manage-expenses/core';
 
 export interface ChartSlice {
   id: string;
@@ -24,6 +24,7 @@ function groupSlices(slices: ChartSlice[]): ChartSlice[] {
 
 /** Donut chart with a visible legend that doubles as the text alternative. */
 export function CategoryChart({ slices, emptyText = 'No spending yet this month.' }: CategoryChartProps) {
+  const money = useMoney();
   const items = groupSlices(slices);
   const total = items.reduce((sum, s) => sum + s.amount, 0);
   if (total <= 0) return <p className="empty">{emptyText}</p>;
@@ -55,14 +56,14 @@ export function CategoryChart({ slices, emptyText = 'No spending yet this month.
           />
         ))}
         <text x="21" y="20" textAnchor="middle" className="donut-label">Total</text>
-        <text x="21" y="25" textAnchor="middle" className="donut-total">{formatMoney(total)}</text>
+        <text x="21" y="25" textAnchor="middle" className="donut-total">{money(total)}</text>
       </svg>
       <ul className="legend" aria-label="Spending by category">
         {arcs.map((a) => (
           <li key={a.id}>
             <span className="swatch" style={{ background: a.color }} aria-hidden="true" />
             <span className="legend-name">{a.label}</span>
-            <span className="legend-value">{formatMoney(a.amount)} <span className="muted">({Math.round(a.percent)}%)</span></span>
+            <span className="legend-value">{money(a.amount)} <span className="muted">({Math.round(a.percent)}%)</span></span>
           </li>
         ))}
       </ul>

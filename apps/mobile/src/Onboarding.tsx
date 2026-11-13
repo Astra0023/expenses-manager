@@ -27,7 +27,7 @@ export function Onboarding() {
       <Text style={[styles.muted, { marginBottom: 12 }]}>Your current tax ({user.taxRate}%) and savings ({user.savingsRate}%) settings determine your spending limit. Fine-tune them in Profile.</Text>
       <Button title="Save spending plan" disabled={busy} onPress={() => void run(async () => {
         if (!Number.isFinite(Number(income)) || Number(income) <= 0) throw new Error('Enter a positive monthly income.');
-        await updateProfile({ firstName: user.firstName, lastName: user.lastName, monthlyIncome: Number(income), taxRate: user.taxRate, savingsRate: user.savingsRate });
+        await updateProfile({ firstName: user.firstName, lastName: user.lastName, currency: user.currency, monthlyIncome: Number(income), taxRate: user.taxRate, savingsRate: user.savingsRate });
         setStep(1);
       })} />
     </>}

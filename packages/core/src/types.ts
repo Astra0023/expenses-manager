@@ -17,6 +17,25 @@ export const DEFAULT_CATEGORY_NAMES = [
   'Other',
 ] as const;
 
+export const DEFAULT_CURRENCY = 'USD';
+export const CURRENCY_OPTIONS = [
+  { value: 'USD', label: 'US Dollar (USD)' },
+  { value: 'CAD', label: 'Canadian Dollar (CAD)' },
+  { value: 'EUR', label: 'Euro (EUR)' },
+  { value: 'GBP', label: 'British Pound (GBP)' },
+  { value: 'AUD', label: 'Australian Dollar (AUD)' },
+  { value: 'NZD', label: 'New Zealand Dollar (NZD)' },
+  { value: 'JPY', label: 'Japanese Yen (JPY)' },
+  { value: 'CNY', label: 'Chinese Yuan (CNY)' },
+  { value: 'INR', label: 'Indian Rupee (INR)' },
+  { value: 'PHP', label: 'Philippine Peso (PHP)' },
+] as const;
+export type CurrencyCode = (typeof CURRENCY_OPTIONS)[number]['value'];
+
+export function isCurrencyCode(value: unknown): value is CurrencyCode {
+  return typeof value === 'string' && CURRENCY_OPTIONS.some((option) => option.value === value);
+}
+
 export type CategoryStatus = 'active' | 'inactive';
 
 export interface Category {
@@ -52,6 +71,7 @@ export type NewPayment = Omit<Payment, 'id'>;
 export interface Profile {
   firstName: string;
   lastName: string;
+  currency: CurrencyCode;
   monthlyIncome: number;
   /** percent of income withheld as tax (0-100) */
   taxRate: number;

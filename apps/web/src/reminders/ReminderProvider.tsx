@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { formatMoney, todayISO, useApp, type Payment } from '@manage-expenses/core';
+import { todayISO, useApp, useMoney, type Payment } from '@manage-expenses/core';
 import { errorMessage } from '../utils/errors';
 import { describeDue, needsAttention, sortByDueDate } from '../utils/payments';
 
@@ -68,6 +68,7 @@ export function useReminders(): ReminderContextValue {
  */
 export function ReminderProvider({ children }: { children: ReactNode }) {
   const { user, payments } = useApp();
+  const money = useMoney();
   const [today, setToday] = useState(todayISO);
   const [permission, setPermission] = useState<NotificationState>(readPermission);
   const [isOptedIn, setIsOptedIn] = useState(() => readFlag(prefKey(user.id)));
@@ -109,7 +110,7 @@ export function ReminderProvider({ children }: { children: ReactNode }) {
       changed = true;
       try {
         const notification = new Notification(`Payment reminder: ${p.title}`, {
-          body: `${formatMoney(p.amount)} \u2014 ${describeDue(p, today)}. Mark it paid in Expenses Manager once settled.`,
+          body: `${money(p.amount)} \u2014 ${describeDue(p, today)}. Mark it paid in Expenses Manager once settled.`,
           tag: `me-payment-${key}`,
         });
         notification.onclick = () => {
@@ -124,7 +125,7 @@ export function ReminderProvider({ children }: { children: ReactNode }) {
       }
     }
     if (changed) writeSent(sentKey(user.id), sent);
-  }, [activeReminders, isEnabled, today, user.id]);
+  }, [activeReminders, isEnabled, money, today, user.id]);
 
   const enable = useCallback(async () => {
     setError('');

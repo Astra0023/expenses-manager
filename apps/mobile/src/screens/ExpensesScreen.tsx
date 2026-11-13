@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
-import { filterExpenses, formatMoney, monthRange, shiftMonth, currentMonth, todayISO, useApp, type Expense } from '@manage-expenses/core';
+import { filterExpenses, monthRange, shiftMonth, currentMonth, todayISO, useApp, useMoney, type Expense } from '@manage-expenses/core';
 import { Button, Field, Select } from '../ui';
 import { styles } from '../styles';
 
 export function ExpensesScreen() {
   const { expenses, categories, activeCategories, categoryName, addExpense, updateExpense, removeExpense } = useApp();
+  const money = useMoney();
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [amount, setAmount] = useState('');
@@ -51,7 +52,7 @@ export function ExpensesScreen() {
   };
 
   const confirmDelete = (e: Expense) =>
-    Alert.alert('Delete expense', `${formatMoney(e.amount)} on ${e.date}?`, [
+    Alert.alert('Delete expense', `${money(e.amount)} on ${e.date}?`, [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete',
@@ -102,7 +103,7 @@ export function ExpensesScreen() {
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.h2}>Expenses — total {formatMoney(total)}</Text>
+        <Text style={styles.h2}>Expenses — total {money(total)}</Text>
         {visible.length === 0 && <Text>No expenses found.</Text>}
         {visible.map((e) => (
           <View key={e.id} style={styles.item}>
@@ -110,7 +111,7 @@ export function ExpensesScreen() {
               <Text>{e.date} · {categoryName(e.categoryId)}</Text>
               {!!e.note && <Text style={styles.muted}>{e.note}</Text>}
             </View>
-            <Text>{formatMoney(e.amount)}</Text>
+            <Text>{money(e.amount)}</Text>
             <Pressable onPress={() => startEdit(e)}><Text style={styles.link}>Edit</Text></Pressable>
             <Pressable onPress={() => confirmDelete(e)}><Text style={styles.danger}>Delete</Text></Pressable>
           </View>

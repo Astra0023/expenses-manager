@@ -23,7 +23,7 @@ For free-tier website hosting and native mobile distribution, see the
 - **Manage Expenses** – add, edit, delete; filter by month and category.
 - **Reports** – defaults to a yearly spending chart with months below; monthly and quarterly reports are also available. Filter by category and year. Yearly comparisons show zero-spend months through the current month and omit future months.
 - **Category** – add, edit, delete (sets status to inactive; can be reactivated). Active categories feed the expense form.
-- **Profile** – first/last name, password change, monthly income, tax rate (%) and savings (% of net). The calculator shows net income and recommended monthly spending: `income − tax − savings`.
+- **Profile** – first/last name, password change, currency, monthly income, tax rate (%) and savings (% of net). Currency changes how amounts are displayed; existing values are not converted. The calculator shows net income and recommended monthly spending: `income − tax − savings`.
 - **About** – description of the app and its features.
 
 On the web app, use the menu icon to expand or collapse navigation on narrow screens.

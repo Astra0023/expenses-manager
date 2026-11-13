@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { filterExpenses, formatMoney, monthRange, todayISO, useApp, type Expense } from '@manage-expenses/core';
+import { filterExpenses, monthRange, todayISO, useApp, useMoney, type Expense } from '@manage-expenses/core';
 import { ExpenseTable } from '../components/ExpenseTable';
 import { categoryBudgetStatuses } from '../utils/budgets';
 import { formatDate } from '../utils/dates';
@@ -8,6 +8,7 @@ import { errorMessage } from '../utils/errors';
 
 export function ExpensesPage() {
   const { expenses, categories, activeCategories, categoryName, categoryBudgets, addExpense, updateExpense, removeExpense } = useApp();
+  const money = useMoney();
   const amountRef = useRef<HTMLInputElement>(null);
 
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -42,7 +43,7 @@ export function ExpensesPage() {
       .find((s) => s.categoryId === catId);
     if (!status || status.level === 'ok') return '';
     return status.level === 'over'
-      ? ` ${categoryName(catId)} is now ${formatMoney(status.spent - status.budget)} over its ${formatMoney(status.budget)} monthly limit.`
+      ? ` ${categoryName(catId)} is now ${money(status.spent - status.budget)} over its ${money(status.budget)} monthly limit.`
       : ` ${categoryName(catId)} has used ${Math.round(status.percent)}% of its monthly limit.`;
   };
 
@@ -56,7 +57,7 @@ export function ExpensesPage() {
       const notice = budgetNotice(input.categoryId, input.date, input.amount);
       if (editingId) await updateExpense(editingId, input);
       else await addExpense(input);
-      setMessage({ ok: true, text: `${editingId ? 'Saved changes' : `Added ${formatMoney(input.amount)}`}.${notice}` });
+      setMessage({ ok: true, text: `${editingId ? 'Saved changes' : `Added ${money(input.amount)}`}.${notice}` });
       reset();
       amountRef.current?.focus();
     } catch (err) {
@@ -78,7 +79,7 @@ export function ExpensesPage() {
   };
 
   const handleDelete = async (e: Expense) => {
-    if (!window.confirm(`Delete ${formatMoney(e.amount)} on ${formatDate(e.date)}?`)) return;
+    if (!window.confirm(`Delete ${money(e.amount)} on ${formatDate(e.date)}?`)) return;
     setMessage(null);
     try {
       await removeExpense(e.id);
@@ -128,7 +129,7 @@ export function ExpensesPage() {
       </section>
 
       <section className="card">
-        <h2>Expenses &mdash; total {formatMoney(total)}</h2>
+        <h2>Expenses &mdash; total {money(total)}</h2>
         {visible.length === 0 ? <p className="empty">No expenses found.</p> : (
           <ExpenseTable
             expenses={visible}
@@ -136,8 +137,8 @@ export function ExpensesPage() {
             caption="Expenses matching the current filters"
             renderActions={(e) => (
               <>
-                <button type="button" className="link" onClick={() => startEdit(e)} aria-label={`Edit ${formatMoney(e.amount)} on ${formatDate(e.date)}`}>Edit</button>
-                <button type="button" className="link danger" onClick={() => void handleDelete(e)} aria-label={`Delete ${formatMoney(e.amount)} on ${formatDate(e.date)}`}>Delete</button>
+                <button type="button" className="link" onClick={() => startEdit(e)} aria-label={`Edit ${money(e.amount)} on ${formatDate(e.date)}`}>Edit</button>
+                <button type="button" className="link danger" onClick={() => void handleDelete(e)} aria-label={`Delete ${money(e.amount)} on ${formatDate(e.date)}`}>Delete</button>
               </>
             )}
           />

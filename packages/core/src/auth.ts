@@ -1,7 +1,7 @@
 import { pbkdf2 } from '@noble/hashes/pbkdf2';
 import { sha256 } from '@noble/hashes/sha256';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
-import type { Account, KeyValueStorage, Profile, RandomBytes, RegisterInput } from './types';
+import { DEFAULT_CURRENCY, isCurrencyCode, type Account, type KeyValueStorage, type Profile, type RandomBytes, type RegisterInput } from './types';
 import { KEY_LENGTH, createEncryptedStorage, isSealed, open, seal } from './vault';
 
 const ACCOUNTS_KEY = 'me:accounts';
@@ -131,6 +131,7 @@ function assertPercent(value: number, label: string): void {
 export function validateProfile(p: Profile): void {
   if (typeof p.firstName !== 'string' || !p.firstName.trim()) throw new Error('First name is required');
   if (typeof p.lastName !== 'string' || !p.lastName.trim()) throw new Error('Last name is required');
+  if (!isCurrencyCode(p.currency)) throw new Error('Unsupported currency');
   if (!Number.isFinite(p.monthlyIncome) || p.monthlyIncome < 0) throw new Error('Monthly income must be 0 or more');
   assertPercent(p.taxRate, 'Tax rate');
   assertPercent(p.savingsRate, 'Savings rate');
@@ -201,7 +202,7 @@ export function createAuthService(
 
   function toAccount(stored: StoredAccount, key: Uint8Array): Account {
     const { appData: _data, ...profile } = JSON.parse(open(stored.sealed!, key)) as SealedProfile;
-    return { id: stored.id, username: stored.username, ...profile };
+    return { id: stored.id, username: stored.username, ...profile, currency: profile.currency ?? DEFAULT_CURRENCY };
   }
 
   function sealProfile(profile: SealedProfile, key: Uint8Array): string {
@@ -217,6 +218,7 @@ export function createAuthService(
       monthlyIncome: stored.monthlyIncome ?? 0,
       taxRate: stored.taxRate ?? 0,
       savingsRate: stored.savingsRate ?? 20,
+      currency: DEFAULT_CURRENCY,
       ...(stored.avatar ? { avatar: stored.avatar } : {}),
     };
     for (const name of [`me:expenses:${stored.id}`, `me:categories:${stored.id}`]) {
@@ -285,6 +287,7 @@ export function createAuthService(
       const profile: Profile = {
         firstName: input.firstName.trim(),
         lastName: input.lastName.trim(),
+        currency: DEFAULT_CURRENCY,
         monthlyIncome: 0,
         taxRate: 0,
         savingsRate: 20,
@@ -375,7 +378,7 @@ export function createAuthService(
       const key = requireSession(id);
       const clean: Profile = {
         firstName: profile.firstName?.trim?.() ?? profile.firstName, lastName: profile.lastName?.trim?.() ?? profile.lastName,
-        monthlyIncome: profile.monthlyIncome, taxRate: profile.taxRate, savingsRate: profile.savingsRate,
+        currency: profile.currency, monthlyIncome: profile.monthlyIncome, taxRate: profile.taxRate, savingsRate: profile.savingsRate,
       };
       validateProfile(clean);
       const { accounts, index } = await findOrThrow(id);
@@ -416,6 +419,7 @@ export function createAuthService(
       if (profile) { validateProfile(profile); validateAvatar(profile.avatar); }
       const personal: SealedProfile = profile ? {
         firstName: profile.firstName.trim(), lastName: profile.lastName.trim(),
+        currency: profile.currency,
         monthlyIncome: profile.monthlyIncome, taxRate: profile.taxRate, savingsRate: profile.savingsRate,
         ...(profile.avatar !== undefined ? { avatar: profile.avatar } : {}),
       } : current;

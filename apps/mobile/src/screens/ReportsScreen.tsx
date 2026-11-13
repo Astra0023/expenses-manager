@@ -4,11 +4,11 @@ import {
   availableYears,
   buildReport,
   buildReportWorkbook,
-  formatMoney,
   reportFileName,
   reportMonthLabel,
   summarizeReport,
   useApp,
+  useMoney,
   type ReportPeriod,
 } from '@manage-expenses/core';
 import { Button, Select } from '../ui';
@@ -25,6 +25,7 @@ const CHART_HEIGHT = 120;
 
 export function ReportsScreen() {
   const { expenses, categories, categoryName } = useApp();
+  const money = useMoney();
   const [period, setPeriod] = useState<ReportPeriod>('yearly');
   const [categoryId, setCategoryId] = useState('All');
   const [year, setYear] = useState('All');
@@ -43,7 +44,7 @@ export function ReportsScreen() {
     <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: CHART_HEIGHT + 36, gap: 6 }}>
       {chartRows.map((r) => (
         <View key={r.key} style={{ width: period === 'yearly' ? 64 : undefined, flex: period === 'yearly' ? undefined : 1, alignItems: 'center', justifyContent: 'flex-end' }}>
-          <Text style={{ fontSize: 9, color: '#6b7280' }} numberOfLines={1}>{formatMoney(r.total)}</Text>
+          <Text style={{ fontSize: 9, color: '#6b7280' }} numberOfLines={1}>{money(r.total)}</Text>
           <View style={{ width: '70%', height: r.total === 0 ? 0 : Math.max((r.total / maxTotal) * CHART_HEIGHT, 2), backgroundColor: '#2563eb', borderTopLeftRadius: 3, borderTopRightRadius: 3 }} />
           <Text style={{ fontSize: 9, marginTop: 4 }} numberOfLines={1}>{period === 'yearly' ? reportMonthLabel(r.key) : r.label}</Text>
         </View>
@@ -86,12 +87,12 @@ export function ReportsScreen() {
 
       <View style={styles.card}>
         <Text style={styles.h2}>Dashboard</Text>
-        <View style={styles.item}><Text>Total</Text><Text style={{ fontWeight: '700' }}>{formatMoney(summary.total)}</Text></View>
+        <View style={styles.item}><Text>Total</Text><Text style={{ fontWeight: '700' }}>{money(summary.total)}</Text></View>
         <View style={styles.item}><Text>Transactions</Text><Text style={{ fontWeight: '700' }}>{summary.count}</Text></View>
-        <View style={styles.item}><Text>Average per {period === 'quarterly' ? 'quarter' : period === 'yearly' || period === 'monthly' ? 'month' : 'period'}</Text><Text style={{ fontWeight: '700' }}>{formatMoney(summary.average)}</Text></View>
+        <View style={styles.item}><Text>Average per {period === 'quarterly' ? 'quarter' : period === 'yearly' || period === 'monthly' ? 'month' : 'period'}</Text><Text style={{ fontWeight: '700' }}>{money(summary.average)}</Text></View>
         <View style={styles.item}>
           <Text>Highest period</Text>
-          <Text style={{ fontWeight: '700' }}>{summary.highest ? `${summary.highest.label} · ${formatMoney(summary.highest.total)}` : '—'}</Text>
+          <Text style={{ fontWeight: '700' }}>{summary.highest ? `${summary.highest.label} · ${money(summary.highest.total)}` : '—'}</Text>
         </View>
       </View>
 
@@ -110,7 +111,7 @@ export function ReportsScreen() {
               <View key={c.id}>
                 <View style={styles.item}>
                   <Text>{categoryName(c.id)}</Text>
-                  <Text>{formatMoney(c.amount)} ({Math.round(c.percent)}%)</Text>
+                  <Text>{money(c.amount)} ({Math.round(c.percent)}%)</Text>
                 </View>
                 <View style={styles.bar}><View style={[styles.barFill, { width: `${c.percent}%` }]} /></View>
               </View>
@@ -123,10 +124,10 @@ export function ReportsScreen() {
               <View key={r.key} style={{ marginBottom: 8 }}>
                 <View style={styles.item}>
                   <Text style={{ fontWeight: '600' }}>{period === 'yearly' ? reportMonthLabel(r.key) : r.label} ({r.count})</Text>
-                  <Text style={{ fontWeight: '600' }}>{formatMoney(r.total)}</Text>
+                  <Text style={{ fontWeight: '600' }}>{money(r.total)}</Text>
                 </View>
                 {Object.entries(r.byCategory).map(([id, v]) => (
-                  <View key={id} style={styles.item}><Text>   {categoryName(id)}</Text><Text>{formatMoney(v)}</Text></View>
+                  <View key={id} style={styles.item}><Text>   {categoryName(id)}</Text><Text>{money(v)}</Text></View>
                 ))}
               </View>
             ))}

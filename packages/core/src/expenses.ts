@@ -1,5 +1,5 @@
 import { bytesToHex } from '@noble/hashes/utils';
-import type { Expense, ExpenseFilter, KeyValueStorage, NewExpense, RandomBytes } from './types';
+import { DEFAULT_CURRENCY, isCurrencyCode, type CurrencyCode, type Expense, type ExpenseFilter, type KeyValueStorage, type NewExpense, type RandomBytes } from './types';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -43,8 +43,9 @@ export function filterExpenses(expenses: Expense[], f: ExpenseFilter): Expense[]
     .sort((a, b) => b.date.localeCompare(a.date));
 }
 
-export function formatMoney(n: number): string {
-  return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+export function formatMoney(n: number, currency: CurrencyCode = DEFAULT_CURRENCY): string {
+  if (!isCurrencyCode(currency)) throw new Error('Unsupported currency');
+  return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(n);
 }
 
 export function createExpenseService(storage: KeyValueStorage, randomBytes: RandomBytes, userId: string) {

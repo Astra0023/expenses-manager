@@ -5,8 +5,21 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "plugins": ["expo-notifications", "expo-document-picker"],
-    "ios": { "bundleIdentifier": "com.example.manageexpenses" },
-    "android": { "package": "com.example.manageexpenses" }
+    "plugins": [
+      "expo-notifications",
+      "expo-document-picker"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.example.manageexpenses"
+    },
+    "android": {
+      "package": "com.example.manageexpenses"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7438748f-a4d0-4e35-bdef-b1b6534d5b08"
+      }
+    },
+    "owner": "astra0023"
   }
 }
